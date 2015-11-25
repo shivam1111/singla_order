@@ -5,7 +5,7 @@
     	<li class='list-group-item'>
 			<div class="select_project oe_form create_form oe_right" style="display:inline-block;" >
 				<h4>Price</h4>
-				<span><input type = "text" value="0"/></span>
+				<span><input style="text-align:center;" type="number" step="0.01" value="0"/></span>
 			</div>
 			<br/>
 			<div>

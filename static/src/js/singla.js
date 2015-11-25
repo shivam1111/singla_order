@@ -30,9 +30,9 @@ openerp.singla_order = function(instance, local) {
     	start:function(){
     		this._super();
     		var self = this
-    		partner_div = $("<div class = 'select_project oe_form create_form' style = 'display:inline-block;'><h4>Customer</h4></div>")
-    		self.partner_m2o.appendTo(partner_div).then(function(){
-    			self.$el.prepend(partner_div)
+    		self.partner_div = $("<div class = 'select_project oe_form create_form' style = 'display:inline-block;'><h4>Customer</h4></div>")
+    		self.partner_m2o.appendTo(self.partner_div).then(function(){
+    			self.$el.prepend(self.partner_div)
     		})
     	},
     })

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name = "singla_order">
+    	<li class='list-group-item'>
+			<div class="select_project oe_form create_form oe_right" style="display:inline-block;" >
+				<h4>Price</h4>
+				<span><input type = "text" value="0"/></span>
+			</div>
+			<br/>
+			<div>
+				<textarea class="field_text" rows="6" name="comment" placeholder="Internal note..." data-autosize-on="true" style="height: 114px;width:100%;overflow: hidden; word-wrap: break-word; resize: horizontal;"></textarea>
+			</div>
+    	</li>
+   	</t>
+    
+    <t t-name = "order_document">
+    	<div class = "oe_form_sheetbg">
+    		<div class = "oe_form_sheet oe_form_sheet_width" style = "border-style:groove;">
+    			<h2>Orders</h2>
+    		</div>
+    	</div>
+    </t>
+</templates>

@@ -1,0 +1,68 @@
+<openerp>
+	<data>
+        <record id="action_singla_order_interface" model="ir.actions.client">
+            <field name="name">Order Sheet</field>
+            <field name="tag">singla.order</field>
+        </record>
+		<menuitem id = "parent_singla_menu_order" name = "Orders" />
+		<menuitem id = "parent_singla_menu_order_interface" parent = "parent_singla_menu_order" action = "action_singla_order_interface" />
+		
+		<!-- SIngla ORder view -->
+		<record id = "singla_order_tree" model = "ir.ui.view">
+            <field name="name">Order Sheet</field>
+            <field name="model">singla.order</field>
+            <field name="priority" eval="17"/>
+            <field name="arch" type="xml">
+            	<tree string = "Singla Orders">
+					<field name = "date" />
+            		<field name = "partner_id"/>
+					<field name = "notes" />
+            	</tree>
+            </field>
+        </record>
+            		
+		<record id = "singla_order_form" model = "ir.ui.view">
+            <field name="name">Order Sheet</field>
+            <field name="model">singla.order</field>
+            <field name="priority" eval="17"/>
+            <field name="arch" type="xml">
+				<form string = "Singla Order Form" >
+					<sheet>
+						<group>
+							<group>
+								<field name = "partner_id" />
+							</group>
+							<group>
+								<field name = "date" />
+							</group>						
+						</group>
+						<group string = "Notes">
+							<field name = "notes" nolabel="1"/>
+						</group>
+						<notebook>
+							<page string = "Order Lines">
+								<field name = "line_ids" nolabel = "1">
+									<tree string = "Order Lines" widget="one2many_list" editable = "bottom">
+										<field name = "size" />
+										<field name = "weight" />
+										<field name = "price" />
+									</tree>
+								</field>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+            </field>
+		</record>
+      <record id="action_singla_order" model="ir.actions.act_window">
+            <field name="name">Order Records</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">singla.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+      </record>
+      <menuitem id = "parent_singla_menu_order_records" parent = "parent_singla_menu_order" action = "action_singla_order" />						
+		
+
+	</data>
+</openerp>

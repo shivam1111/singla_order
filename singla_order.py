@@ -26,6 +26,7 @@ class singla_order_line(models.Model):
         for i in records:
             res.update({
                         i.id:{
+                              'id':i.id,
                               'size':i.size,
                               'weight':i.weight,
                               'price':i.price,

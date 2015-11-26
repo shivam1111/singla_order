@@ -9,43 +9,104 @@ var KanbanView = require('web_kanban.KanbanView');
 var KanbanRecord = require('web_kanban.Record');
 var QWeb = core.qweb;
 
-instance.web.form.FieldMany2One.extend({
-    initialize_field: function() {
-        this.is_started = true;
-        var self = this;
-        core.bus.on('click', this, function() {
-           if (this.$input && this.$input.attr('autocomplete') != undefined){
-		   if (!this.get("effective_readonly") && this.$input && this.$input.autocomplete('widget').is(':visible')) {
-		        this.$input.autocomplete("close");
-		    }
-	   } 
-        });
-        common.ReinitializeFieldMixin.initialize_field.call(this);
-    },
-});
-
 openerp.singla_order = function(instance, local) {
     var _t = instance.web._t,
         _lt = instance.web._lt;
     var QWeb = instance.web.qweb;
 
     local.singla_order_line = instance.Widget.extend({
-    	init:function(size,price,weight,options){
-    		this._super();
-    		this.size = size;
-    		this.price = price;
-    		this.weight = weight;
+    	template:'singla_order_line',
+    	events:{
+    		"keyup":"event_keyboard",
+    		"change input.singla-input-size":"change_size",
+    		"change input.singla-input-price":"change_price",
+    		"change .singla-input-weight":"change_weight",
     	},
+    	event_keyboard:function(e){
+    		var self = this;
+    		switch (e.keyCode){
+			case 46:
+				self.unlink()
+			case 13:
+				self.parent.create_order_line();
+    		}
+    	},
+    	unlink:function(){
+    		var self = this;
+    		this.singla_order_line.call('unlink',[this.id]).then(function(){
+    			self.destroy();
+    		})
+    	},
+    	init:function(parent,id,size,price,weight,options){
+    		this._super();
+    		this.id = id
+    		this.parent = parent;
+    		this.singla_order_line = new instance.web.Model('singla.order.line');
+    		this.set({
+    			'size':size,
+    			'price':price,
+    			'weight':weight,
+    		})
+    	},
+    	change_size:function(e){
+    		this.set({
+    			'size':$(e.target).val()
+			})
+    	},
+    	change_weight:function(e){
+    		this.set({
+    			'weight':$(e.target).val()
+			})
+    	},    	
+    	
+    	change_price:function(e){
+    		this.set({
+    			'price':$(e.target).val()
+			})
+		},
+		save_data:function(){
+			var self=this;
+			singla_order_line = new instance.web.Model('singla.order.line')
+			console.log("self.get('size')",self.get('size'),self.get('price'),self.get('weight'))
+			singla_order_line.call('write',[[parseInt(self.id)],{
+				'size':self.get('size'),
+				'price':self.get('price'),
+				'weight':self.get('weight')
+			}])
+		},
     	start:function(){
     		this._super()
-    	},
-    	renderElement:function(){
-    		this.$el = $(QWeb.render("singla_order_line", {'size':this.size,'price':this.price,'weight':this.weight}))
+    		var self = this
+    		this.on('save_data',self,function(){
+    			self.save_data();
+    		});
     	},
     });
     
     local.singla_order = instance.Widget.extend({
     	template:'singla_order',
+        events : {
+			"click .button_save":"save_data",
+			"click .button_delete":"delete_record",
+			"change .singla-order-price":"change_price",
+			"change .field_text":"change_notes"
+        },
+        create_order_line(){
+        	var self = this
+        	singla_order_line = new instance.web.Model('singla.order.line');
+        	singla_order_line.call('create',[{'order_id':self.order.id}]).done(function(id){
+        		line_widget  = new local.singla_order_line(self,id,'',0,0)
+        		line_widget.appendTo(self.$el.find('.singla-order-line-div'));
+        		self.line_widget.push(line_widget)
+        	})
+        },
+        change_price:function(e){
+        	this.order.price = $(e.target).val();
+        },
+        change_notes:function(e){
+        	this.order.notes = $(e.target).val();
+        	console.log(this.order.notes)
+        },
     	init:function(order,lines,options){
     		var self = this;
     		this._super();
@@ -82,18 +143,40 @@ openerp.singla_order = function(instance, local) {
     			}
     		})
     	},
+    	save_data:function(){
+    		var self=this
+    		singla_order = new instance.web.Model('singla.order');
+    		singla_order.call('write',[[parseInt(self.order.id)],{'notes':self.notes,'price':self.order.price,
+    															'date':self.order.date,'partner_id':self.order.partner_id}]).then(function(){
+    			_.each(self.line_widget,function(line){
+    				line.trigger('save_data',true)
+    			})
+    		})
+    	},
+    	delete_record:function(){
+    		var self=this;
+    		singla_order = new instance.web.Model('singla.order');
+    		singla_order.call('unlink',[this.order.id]).done(function(){
+    			self.destroy();
+    		})
+    	},
     	start:function(){
     		this._super();
     		var self = this
     		self.partner_div = $("<div class = 'select_project oe_form create_form oe_left' style = 'display:inline-block;'></div>")
     		self.partner_m2o.appendTo(self.partner_div).then(function(){
-    			self.partner_m2o.$el.find('input').attr('autocomplete','off')
+    			self.partner_m2o.on('change:value',self,function(){
+    				self.order.partner_id = self.partner_m2o.get_value();
+    			})
+    			self.FieldDate.on('change:value',self,function(){
+    				self.order.date = self.FieldDate.get_value()
+    			})
     			self.FieldDate.appendTo(self.partner_div) 
     			self.FieldDate.set_value(self.order.date);
     			self.$el.prepend(self.partner_div)
     			self.partner_m2o.set_value(self.order.partner_id);
     			_.each(self.lines,function(line){
-    				new_line = new local.singla_order_line(line.size,line.price,line.weight);
+    				new_line = new local.singla_order_line(self,line.id,line.size,line.price,line.weight);
     				self.line_widget.push(new_line);
     				new_line.appendTo(self.$el.find('div.singla-order-line-div'))
     			});

@@ -4,11 +4,11 @@
 	<t t-name = "singla_order_line">
 		<div  class="singla-order-line">
 			  <div>
-			    <input id="size"  class="singla-input-size" type="text" t-att-value="size"/>
-			    <input id="price" class="singla-input-price" type="number" step="0.01" t-att-value = "price"/>
+			    <input id="size"  class="singla-input-size" type="text" t-att-value="widget.get('size')"/>
+			    <input id="price" class="singla-input-price" type="number" step="0.01" t-att-value = "widget.get('price')"/>
 			  </div>
 			  <div>
-			  	<input class="singla-input-weight" id = "weight" size="5" t-att-value="weight" type = "number" step ="0.01" />
+			  	<input class="singla-input-weight" id = "widget.get('weight')" size="5" t-att-value="weight" type = "number" step ="0.01" />
 			  </div>
 		</div>
 	</t>
@@ -16,20 +16,20 @@
     <t t-name = "singla_order">
     	<li class='list-group-item'>
     		<div class = "oe_right">
-    			<button class="oe_highlight" tabindex="17" type="button">Save</button>
-    			<button class="oe_highlight" tabindex="18" type="button">Delete</button>
+    			<button class="oe_highlight button_save" tabindex="17" type="button">Save</button>
+    			<button class="oe_highlight button_delete" tabindex="18" type="button">Delete</button>
     		</div>
 			<div class="select_project oe_form create_form oe_right" style="display:inline-block;" >
 				<h4>Price</h4>
-				<span><input style="text-align:center;" type="number" step="0.01" t-att-value="widget.order.price"/></span>
+				<span><input style="text-align:center;" class="singla-order-price" type="number" step="0.01" t-att-value="widget.order.price"/></span>
+			</div>
+			<div>
+				<textarea class="field_text" rows="4" name="comment" placeholder="Internal note..." data-autosize-on="true" style="width:100%;overflow: hidden; word-wrap: break-word; resize: horizontal;"><t t-esc="widget.order.notes or ''"/></textarea>
 			</div>
 			<!-- Sale Order Line Div -->
 					<div class="singla-order-line-div">
 					</div>
-			<!-- Sale Order Line  Div-->
-			<div>
-				<textarea class="field_text" rows="4" name="comment" placeholder="Internal note..." data-autosize-on="true" style="width:100%;overflow: hidden; word-wrap: break-word; resize: horizontal;"><t t-esc="widget.order.notes or ''"/></textarea>
-			</div>
+			<!-- Sale Order Line  Div-->			
     	</li>
    	</t>
     

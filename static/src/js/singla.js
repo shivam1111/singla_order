@@ -9,6 +9,21 @@ var KanbanView = require('web_kanban.KanbanView');
 var KanbanRecord = require('web_kanban.Record');
 var QWeb = core.qweb;
 
+instance.web.form.FieldMany2One.extend({
+    initialize_field: function() {
+        this.is_started = true;
+        var self = this;
+        core.bus.on('click', this, function() {
+           if (this.$input && this.$input.attr('autocomplete') != undefined){
+		   if (!this.get("effective_readonly") && this.$input && this.$input.autocomplete('widget').is(':visible')) {
+		        this.$input.autocomplete("close");
+		    }
+	   } 
+        });
+        common.ReinitializeFieldMixin.initialize_field.call(this);
+    },
+});
+
 openerp.singla_order = function(instance, local) {
     var _t = instance.web._t,
         _lt = instance.web._lt;
@@ -38,7 +53,7 @@ openerp.singla_order = function(instance, local) {
     		this.lines = lines;
     		this.line_widget=[]
             this.dfm = new instance.web.form.DefaultFieldManager(self);
-            this.dfm.extend_field_desc({
+    		this.dfm.extend_field_desc({
                 date:{
                 	'string':'Date',
                 },
@@ -67,16 +82,11 @@ openerp.singla_order = function(instance, local) {
     			}
     		})
     	},
-    	destrot:function(){
-    		this._super();
-    		this.partner_m2o.$el.find('input').autocomplete('destroy');
-    	},
     	start:function(){
     		this._super();
     		var self = this
     		self.partner_div = $("<div class = 'select_project oe_form create_form oe_left' style = 'display:inline-block;'></div>")
     		self.partner_m2o.appendTo(self.partner_div).then(function(){
-    			console.log(self.partner_m2o.$el.find('input'));
     			self.partner_m2o.$el.find('input').attr('autocomplete','off')
     			self.FieldDate.appendTo(self.partner_div) 
     			self.FieldDate.set_value(self.order.date);

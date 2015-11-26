@@ -3,6 +3,7 @@
     	<template id="assets_backend" name="singla_order assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/singla_order/static/src/js/singla.js"></script>
+                <link href="/singla_order/static/src/css/singla.css" rel="stylesheet" type="text/css" />
              </xpath>
         </template>				
 	</data>

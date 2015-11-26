@@ -1,0 +1,29 @@
+li.list-group-item:hover{
+   border: 1px solid;
+}
+.singla-order-line-div{
+   padding:5px;
+   display: -webkit-inline-box;
+}
+.singla-order-line{
+   display:inline-block;
+   border: 1px solid;
+   padding-right: 6px;
+   padding-left: 6px;
+}
+.singla-input-size{
+   width:100px;
+   text-align:center;	
+}
+.singla-input-price{
+   width:70px;
+   text-align:center;
+}
+
+.singla-input-weight{
+    width:70px;
+    position: relative;
+    display: block;
+    margin:0 auto;
+    text-align:center;	
+}

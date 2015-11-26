@@ -33,6 +33,7 @@
 								<field name = "partner_id" />
 							</group>
 							<group>
+								<field name = "price" />
 								<field name = "date" />
 							</group>						
 						</group>

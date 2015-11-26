@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
+	<t t-name = "singla_order_line">
+		<div  class="singla-order-line">
+			  <div>
+			    <input id="size"  class="singla-input-size" type="text" t-att-value="size"/>
+			    <input id="price" class="singla-input-price" type="number" step="0.01" t-att-value = "price"/>
+			  </div>
+			  <div>
+			  	<input class="singla-input-weight" id = "weight" size="5" t-att-value="weight" type = "number" step ="0.01" />
+			  </div>
+		</div>
+	</t>
+
     <t t-name = "singla_order">
     	<li class='list-group-item'>
+    		<div class = "oe_right">
+    			<button class="oe_highlight" tabindex="17" type="button">Save</button>
+    			<button class="oe_highlight" tabindex="18" type="button">Delete</button>
+    		</div>
 			<div class="select_project oe_form create_form oe_right" style="display:inline-block;" >
 				<h4>Price</h4>
-				<span><input style="text-align:center;" type="number" step="0.01" value="0"/></span>
+				<span><input style="text-align:center;" type="number" step="0.01" t-att-value="widget.order.price"/></span>
 			</div>
-			<br/>
+			<!-- Sale Order Line Div -->
+					<div class="singla-order-line-div">
+					</div>
+			<!-- Sale Order Line  Div-->
 			<div>
-				<textarea class="field_text" rows="6" name="comment" placeholder="Internal note..." data-autosize-on="true" style="height: 114px;width:100%;overflow: hidden; word-wrap: break-word; resize: horizontal;"></textarea>
+				<textarea class="field_text" rows="4" name="comment" placeholder="Internal note..." data-autosize-on="true" style="width:100%;overflow: hidden; word-wrap: break-word; resize: horizontal;"><t t-esc="widget.order.notes or ''"/></textarea>
 			</div>
     	</li>
    	</t>

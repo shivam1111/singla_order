@@ -7,6 +7,7 @@ class singla_order(models.Model):
     
     date=fields.Date('Date',default=lambda self:time.strftime("%Y-%m-%d"))
     partner_id = fields.Many2one('res.partner','Customer')
+    price = fields.Float("Price")
     notes = fields.Text('Notes')
     line_ids = fields.One2many('singla.order.line','order_id','Order lines')
     

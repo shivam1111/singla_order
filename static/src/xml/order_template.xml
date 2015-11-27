@@ -4,7 +4,7 @@
 	<t t-name = "singla_order_line">
 		<div  class="singla-order-line">
 			  <div>
-			    <input id="size"  class="singla-input-size" type="text" t-att-value="widget.get('size')"/>
+			    <input id="size"  class="singla-input-size" type="text" t-att-value="widget.get('size')  or ''"/>
 			    <input id="price" class="singla-input-price" type="number" step="0.01" t-att-value = "widget.get('price')"/>
 			  </div>
 			  <div>
@@ -34,9 +34,65 @@
    	</t>
     
     <t t-name = "order_document">
-    	<div class = "oe_form_sheetbg">
+    	<div class = "oe_form_sheetbg" style="overflow: auto;max-height: 100vh;">
     		<div class = "oe_form_sheet oe_form_sheet_width" style = "border-style:groove;">
-    			<h2>Orders</h2>
+				<div class="oe_right add_an_order">
+					<a href="#">Add an Order</a>
+				</div>
+				<h3 align="center" style="display:inline;"><t t-esc="widget.date" /></h3>
+				<div class = "oe_left"  style="display:inline;">
+					<img  draggable="false" style="width:20px;height:20px;display:inline;" title="Click for help" t-att-src="widget.src"/>
+				</div>
+				<div class="tooltip">
+					<div class="tipBody">
+						<table class = "table table-condensed">
+							<thead>
+								<tr>
+									<th>Keys</th>
+									<th>Function</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Enter</td>
+									<td>Creates new order line</td>
+								</tr>
+								<tr>
+									<td>Delete</td>
+									<td>Delete the order line</td>
+								</tr>
+								<tr>
+									<td>PageUp</td>
+									<td>Goto Next Order</td>
+								</tr>
+								<tr>
+									<td>PageDown</td>
+									<td>Goto Previous Order</td>
+								</tr>
+								<tr>
+									<td>Tab</td>
+									<td>Goto Next Field</td>
+								</tr>
+								<tr>
+									<td>Shift + Tab</td>
+									<td>Goto previous field</td>
+								</tr>
+								<tr>
+									<td>Ctrl + s</td>
+									<td>Saves the current Order</td>
+								</tr>
+								<tr>
+									<td>Ctrl + d</td>
+									<td>Deletes the current Order</td>
+								</tr>
+								<tr>
+									<td>Ctrl + Enter</td>
+									<td>Create a new Order</td>
+								</tr>														
+							</tbody>
+						</table>
+					</div>
+				</div>
     		</div>
     	</div>
     </t>

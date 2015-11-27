@@ -4,7 +4,7 @@ var core = require('web.core');
 var data = require('web.data');
 var Model = require('web.Model');
 var session = require('web.session');
-
+var framework = require('web.framework');
 var KanbanView = require('web_kanban.KanbanView');
 var KanbanRecord = require('web_kanban.Record');
 var QWeb = core.qweb;
@@ -24,15 +24,25 @@ openerp.singla_order = function(instance, local) {
     	},
     	event_keyboard:function(e){
     		var self = this;
-    		switch (e.keyCode){
-			case 46:
-				self.unlink()
-			case 13:
-				self.parent.create_order_line();
+    		//ctrl is for the master widget
+    		if (! e.ctrlKey){
+        		switch (e.keyCode){
+    			case 46:
+    				self.unlink();
+    				break;
+        		}    			
+    		}
+    	},
+    	focus_previous_line(self){
+    		if (self.$el.prev().length != 0){
+    			self.$el.prev().find('input.singla-input-size').focus();
+    		}else{
+    			self.$el.next().find('input.singla-input-size').focus();
     		}
     	},
     	unlink:function(){
     		var self = this;
+    		self.focus_previous_line(self);
     		this.singla_order_line.call('unlink',[this.id]).then(function(){
     			self.destroy();
     		})
@@ -67,7 +77,6 @@ openerp.singla_order = function(instance, local) {
 		save_data:function(){
 			var self=this;
 			singla_order_line = new instance.web.Model('singla.order.line')
-			console.log("self.get('size')",self.get('size'),self.get('price'),self.get('weight'))
 			singla_order_line.call('write',[[parseInt(self.id)],{
 				'size':self.get('size'),
 				'price':self.get('price'),
@@ -89,15 +98,68 @@ openerp.singla_order = function(instance, local) {
 			"click .button_save":"save_data",
 			"click .button_delete":"delete_record",
 			"change .singla-order-price":"change_price",
-			"change .field_text":"change_notes"
+			"change .field_text":"change_notes",
+			"keydown":"execute_keydown",
+        },
+        execute_keydown:function(e){
+        	var self = this;
+        	if (e.ctrlKey){
+        		switch (e.keyCode){
+        		case 46:
+        			self.delete_record();
+        			break;
+        		case 83:
+        			self.save_data();
+        			break;
+        		case 68:
+        			e.preventDefault();
+        			self.focus_upper_singla_order(e);
+        			self.delete_record();
+        			break;
+    			}
+        	}
+        	if (! e.ctrlKey){
+	        	switch (e.keyCode){
+	        	case 13:
+	        		e.stopPropagation();
+	        		self.create_order_line();
+	        		break;
+	        	case 33:
+	           		e.stopPropagation();
+	           		self.focus_upper_singla_order(e);
+	           		break;
+	        	case 34:
+	           		e.stopPropagation();
+	           		self.focus_down_singla_order(e);
+	           		break;
+	        	}
+        	}
+    	},
+    	focus_upper_singla_order:function(e){
+    		var self = this;
+    		if (self.$el.prev().length > 0){
+    			self.$el.prev().find('input.ui-autocomplete-input').focus();
+    		}
+		},
+		focus_down_singla_order:function(e){
+    		var self = this;
+    		if (self.$el.next().length > 0){
+    			self.$el.next().find('input.ui-autocomplete-input').focus();
+    		}
+		},
+        widget_focus:function(){
+        	var self = this;
+        	$size_input = self.$el.find("input.singla-input-size")
+        	$size_input.focus();
         },
         create_order_line(){
-        	var self = this
+        	var self = this;
         	singla_order_line = new instance.web.Model('singla.order.line');
         	singla_order_line.call('create',[{'order_id':self.order.id}]).done(function(id){
-        		line_widget  = new local.singla_order_line(self,id,'',0,0)
+        		line_widget  = new local.singla_order_line(self,id,'',self.order.price,0)
         		line_widget.appendTo(self.$el.find('.singla-order-line-div'));
-        		self.line_widget.push(line_widget)
+        		self.line_widget.push(line_widget);
+        		self.widget_focus();
         	})
         },
         change_price:function(e){
@@ -105,7 +167,6 @@ openerp.singla_order = function(instance, local) {
         },
         change_notes:function(e){
         	this.order.notes = $(e.target).val();
-        	console.log(this.order.notes)
         },
     	init:function(order,lines,options){
     		var self = this;
@@ -146,17 +207,19 @@ openerp.singla_order = function(instance, local) {
     	save_data:function(){
     		var self=this
     		singla_order = new instance.web.Model('singla.order');
+    		framework.blockUI();
     		singla_order.call('write',[[parseInt(self.order.id)],{'notes':self.notes,'price':self.order.price,
     															'date':self.order.date,'partner_id':self.order.partner_id}]).then(function(){
     			_.each(self.line_widget,function(line){
     				line.trigger('save_data',true)
-    			})
+    			});
+    			framework.unblockUI();
     		})
     	},
     	delete_record:function(){
     		var self=this;
     		singla_order = new instance.web.Model('singla.order');
-    		singla_order.call('unlink',[this.order.id]).done(function(){
+    		singla_order.call('unlink',[self.order.id]).done(function(){
     			self.destroy();
     		})
     	},
@@ -167,7 +230,7 @@ openerp.singla_order = function(instance, local) {
     		self.partner_m2o.appendTo(self.partner_div).then(function(){
     			self.partner_m2o.on('change:value',self,function(){
     				self.order.partner_id = self.partner_m2o.get_value();
-    			})
+    			});
     			self.FieldDate.on('change:value',self,function(){
     				self.order.date = self.FieldDate.get_value()
     			})
@@ -181,18 +244,53 @@ openerp.singla_order = function(instance, local) {
     				new_line.appendTo(self.$el.find('div.singla-order-line-div'))
     			});
     		});
+    		self.$el.focusin(function(){
+    			self.$el.css("border",'1px solid red')
+    			$(this)[0].scrollIntoView();
+    		});
+    		self.$el.focusout(function(){
+    			self.$el.css("border",'1px solid #c8c8d3')
+    		});
     	},
     })
     
     local.singla_order_web = instance.Widget.extend({
     	template:"order_document",
+    	events:{
+    		'keydown':"execute_keydown",
+    		'click .add_an_order':'create_singla_order'
+    	},
+    	execute_keydown:function(e){
+    		var self = this;
+    		if (e.ctrlKey && e.keyCode == 13 ){
+    			e.stopPropagation();
+    			self.create_singla_order();
+    			return
+    		}
+    	},
+    	widget_focus:function(widget){
+    		widget.partner_m2o.focus();
+    	},
+    	create_singla_order:function(){
+    		var self = this
+    		singla_order = new instance.web.Model('singla.order');
+    		singla_order.call('create',[{}]).done(function(id){
+    			var singla_order_widget = new local.singla_order({},[])
+    			self.order_widget.push(singla_order_widget);
+    			singla_order_widget.appendTo(self.$el.find('div.oe_form_sheet'))
+    			self.widget_focus(singla_order_widget);
+    			singla_order_widget.$el[0].scrollIntoView();
+    		});
+    	},
     	init:function(parent){
     		var self = this;
     		this._super(parent);
     		this.orders= null;
     		this.lines = null;
-    		this.order_widget = []
+    		this.order_widget = [];
+    		this.date = Date();
             this.initialize_data_def = self.initialize_data([],[])
+            this.src= session.url('/singla_order/static/src/img/help.png');
     	},
     	fetch_data_order:function(sale_order,filter){
             def_order = sale_order.query(['date','line_ids','partner_id','notes','price']).filter(filter).all()    		
@@ -221,6 +319,22 @@ openerp.singla_order = function(instance, local) {
     	start: function() {
             this._super();
             var self = this;
+            var tip; // make it global
+            self.$el.find('img').mouseover(function(e) { // no need to point to 'rel'. Just if 'a' has [title] attribute.
+            	tip = $(this).attr('title'); // tip = this title   
+            	$(this).attr('title','');    // empty title
+                self.$el.find('div.tooltip').fadeTo(300, 1)// fade tooltip and populate .tipBody
+
+            }).mousemove(function(e) {
+
+                $('.tooltip').css('top', e.pageY + 10 ); // mouse follow!
+                $('.tooltip').css('left', e.pageX + 20 );
+
+            }).mouseout(function(e) {
+                $('.tooltip').hide(); // mouseout: HIDE Tooltip (do not use fadeTo or fadeOut )
+                $(this).attr( 'title', tip ); // reset title attr
+            });
+            
             $.when(self.initialize_data_def).then(function(){
             	_.each(self.orders,function(order){
                 	new_order = new local.singla_order(order,self.get_order_line(order))

@@ -1,3 +1,26 @@
+div.tooltip{
+    display:none; /* ADDED */
+    padding:5px 10px;
+    background-color:#e5f4fe;
+    border:#5a5959 1px solid;
+    position:absolute;
+    z-index:9999;
+    color:black
+    font-size:0.688em;
+    min-width:100px;
+    min-height:50px;
+}
+
+div.tipBody {
+    background-color:#e5f4fe;
+    padding:2px;
+    
+}
+
+
+input:focus { 
+    background-color: yellow;
+}
 li.list-group-item:hover{
    border: 1px solid;
 }

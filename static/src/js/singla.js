@@ -118,8 +118,10 @@ openerp.singla_order = function(instance, local) {
         	if (! e.ctrlKey){
 	        	switch (e.keyCode){
 	        	case 13:
-	        		e.stopPropagation();
-	        		self.create_order_line();
+	        		if (!$(e.target).hasClass("ui-autocomplete-input")){
+		        		e.stopPropagation();
+		        		self.create_order_line();	        			
+	        		}
 	        		break;
 	        	case 33:
 	           		e.stopPropagation();

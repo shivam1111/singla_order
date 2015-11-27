@@ -1,4 +1,4 @@
-div.tooltip{
+.tooltip{
     display:none; /* ADDED */
     padding:5px 10px;
     background-color:#e5f4fe;
@@ -11,7 +11,7 @@ div.tooltip{
     min-height:50px;
 }
 
-div.tipBody {
+.tipBody {
     background-color:#e5f4fe;
     padding:2px;
     
@@ -44,7 +44,7 @@ li.list-group-item:hover{
 }
 
 .singla-input-weight{
-    width:70px;
+    width:170px;
     position: relative;
     display: block;
     margin:0 auto;

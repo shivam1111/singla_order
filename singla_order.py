@@ -15,8 +15,8 @@ class singla_order_line(models.Model):
     _name = "singla.order.line"
     _description = "Order lines"
     size = fields.Char('Size')
-    weight = fields.Float('Weight')
-    price = fields.Float("Price")
+    weight = fields.Char('Weight')
+    price = fields.Char("Price")
     order_id = fields.Many2one('singla.order','Order')
     
     @api.model

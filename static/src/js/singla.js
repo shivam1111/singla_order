@@ -105,9 +105,6 @@ openerp.singla_order = function(instance, local) {
         	var self = this;
         	if (e.ctrlKey){
         		switch (e.keyCode){
-        		case 46:
-        			self.delete_record();
-        			break;
         		case 83:
         			self.save_data();
         			break;
@@ -126,9 +123,11 @@ openerp.singla_order = function(instance, local) {
 	        		break;
 	        	case 33:
 	           		e.stopPropagation();
+	           		e.preventDefault();
 	           		self.focus_upper_singla_order(e);
 	           		break;
 	        	case 34:
+	        		e.preventDefault();
 	           		e.stopPropagation();
 	           		self.focus_down_singla_order(e);
 	           		break;
@@ -137,17 +136,18 @@ openerp.singla_order = function(instance, local) {
     	},
     	focus_upper_singla_order:function(e){
     		var self = this;
+    		console.log(self.$el.prev());
     		if (self.$el.prev().length > 0){
-    			self.$el.prev().find('input.ui-autocomplete-input').focus();
+    			self.$el.prev().find("input[name='date']").focus();
     		}
 		},
 		focus_down_singla_order:function(e){
     		var self = this;
     		if (self.$el.next().length > 0){
-    			self.$el.next().find('input.ui-autocomplete-input').focus();
+    			self.$el.next().find("input[name='date']").focus();
     		}
 		},
-        widget_focus:function(){
+        line_widget_focus:function(){
         	var self = this;
         	$size_input = self.$el.find("input.singla-input-size")
         	$size_input.focus();
@@ -159,7 +159,7 @@ openerp.singla_order = function(instance, local) {
         		line_widget  = new local.singla_order_line(self,id,'',self.order.price,0)
         		line_widget.appendTo(self.$el.find('.singla-order-line-div'));
         		self.line_widget.push(line_widget);
-        		self.widget_focus();
+        		self.line_widget_focus();
         	})
         },
         change_price:function(e){
@@ -234,7 +234,7 @@ openerp.singla_order = function(instance, local) {
     			self.FieldDate.on('change:value',self,function(){
     				self.order.date = self.FieldDate.get_value()
     			})
-    			self.FieldDate.appendTo(self.partner_div) 
+    			self.FieldDate.prependTo(self.partner_div)
     			self.FieldDate.set_value(self.order.date);
     			self.$el.prepend(self.partner_div)
     			self.partner_m2o.set_value(self.order.partner_id);
@@ -245,7 +245,7 @@ openerp.singla_order = function(instance, local) {
     			});
     		});
     		self.$el.focusin(function(){
-    			self.$el.css("border",'1px solid red')
+    			self.$el.css("border",'2px solid red')
     			$(this)[0].scrollIntoView();
     		});
     		self.$el.focusout(function(){
@@ -269,15 +269,16 @@ openerp.singla_order = function(instance, local) {
     		}
     	},
     	widget_focus:function(widget){
-    		widget.partner_m2o.focus();
+    		widget.FieldDate.focus();
     	},
     	create_singla_order:function(){
     		var self = this
     		singla_order = new instance.web.Model('singla.order');
-    		singla_order.call('create',[{}]).done(function(id){
+    		singla_order.call('create',[{'date':new Date()}]).done(function(id){
     			var singla_order_widget = new local.singla_order({},[])
     			self.order_widget.push(singla_order_widget);
     			singla_order_widget.appendTo(self.$el.find('div.oe_form_sheet'))
+    			singla_order_widget.FieldDate.set_value(new Date());
     			self.widget_focus(singla_order_widget);
     			singla_order_widget.$el[0].scrollIntoView();
     		});
@@ -326,7 +327,6 @@ openerp.singla_order = function(instance, local) {
                 self.$el.find('div.tooltip').fadeTo(300, 1)// fade tooltip and populate .tipBody
 
             }).mousemove(function(e) {
-
                 $('.tooltip').css('top', e.pageY + 10 ); // mouse follow!
                 $('.tooltip').css('left', e.pageX + 20 );
 

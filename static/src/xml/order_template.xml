@@ -5,10 +5,10 @@
 		<div  class="singla-order-line">
 			  <div>
 			    <input id="size"  class="singla-input-size" type="text" t-att-value="widget.get('size')  or ''"/>
-			    <input id="price" class="singla-input-price" type="number" step="0.01" t-att-value = "widget.get('price')"/>
+			    <input id="price" class="singla-input-price" type="text" t-att-value = "widget.get('price') or ''"/>
 			  </div>
 			  <div>
-			  	<input class="singla-input-weight" id = "widget.get('weight')" size="5" t-att-value="weight" type = "number" step ="0.01" />
+			  	<input class="singla-input-weight" id = "widget.get('weight') or ''" t-att-value="weight" type="text" step ="0.01" />
 			  </div>
 		</div>
 	</t>

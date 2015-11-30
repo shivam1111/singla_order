@@ -8,7 +8,7 @@
 			    <input id="price" class="singla-input-price" type="text" t-att-value = "widget.get('price') or ''"/>
 			  </div>
 			  <div>
-			  	<input class="singla-input-weight" id = "widget.get('weight') or ''" t-att-value="weight" type="text" step ="0.01" />
+			  	<input class="singla-input-weight" id = "weight" t-att-value="widget.get('weight') or ''" type="text" step ="0.01" />
 			  </div>
 		</div>
 	</t>
@@ -37,13 +37,18 @@
     	<div class = "oe_form_sheetbg" style="overflow: auto;max-height: 100vh;">
     		<div class = "oe_form_sheet oe_form_sheet_width" style = "border-style:groove;">
 				<div class="oe_right add_an_order">
-					<a href="#">Add an Order</a>
+					<a href="#">Add an Order +</a>
 				</div>
-				<h3 align="center" style="display:inline;"><t t-esc="widget.date" /></h3>
 				<div class = "oe_left"  style="display:inline;">
 					<img  draggable="false" style="width:20px;height:20px;display:inline;" title="Click for help" t-att-src="widget.src"/>
 				</div>
-				<div class="tooltip">
+				<div class="search_partner oe_form create_form" style="display:table-caption;" >
+					<div class="btn-group" role="group">
+					  <button type="button" value="1" name="Trial" class="btn btn-default button_search">Filter</button>
+					  <button type="button" value="2" class="btn btn-default show_all">Show All Records</button>
+					</div>
+				</div>
+				<div class="tip">
 					<div class="tipBody">
 						<table class = "table table-condensed">
 							<thead>
@@ -59,14 +64,14 @@
 								</tr>
 								<tr>
 									<td>Delete</td>
-									<td>Delete the order line</td>
+									<td>Delete the current order line</td>
 								</tr>
 								<tr>
-									<td>PageUp</td>
+									<td>Arrow key DOWN</td>
 									<td>Goto Next Order</td>
 								</tr>
 								<tr>
-									<td>PageDown</td>
+									<td>Arrow key UP</td>
 									<td>Goto Previous Order</td>
 								</tr>
 								<tr>
@@ -89,6 +94,10 @@
 									<td>Ctrl + Enter</td>
 									<td>Create a new Order</td>
 								</tr>														
+								<tr>
+									<td>Ctrl + Delete</td>
+									<td>Deletes current Order</td>
+								</tr>																						
 							</tbody>
 						</table>
 					</div>

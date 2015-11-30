@@ -52,6 +52,7 @@ openerp.singla_order = function(instance, local) {
     		this.id = id
     		this.parent = parent;
     		this.singla_order_line = new instance.web.Model('singla.order.line');
+    		console.log(weight);
     		this.set({
     			'size':size,
     			'price':price,
@@ -123,12 +124,12 @@ openerp.singla_order = function(instance, local) {
 		        		self.create_order_line();	        			
 	        		}
 	        		break;
-	        	case 33:
+	        	case 38:
 	           		e.stopPropagation();
 	           		e.preventDefault();
 	           		self.focus_upper_singla_order(e);
 	           		break;
-	        	case 34:
+	        	case 40:
 	        		e.preventDefault();
 	           		e.stopPropagation();
 	           		self.focus_down_singla_order(e);
@@ -141,12 +142,14 @@ openerp.singla_order = function(instance, local) {
     		console.log(self.$el.prev());
     		if (self.$el.prev().length > 0){
     			self.$el.prev().find("input[name='date']").focus();
+    			self.$el.prev()[0].scrollIntoView();
     		}
 		},
 		focus_down_singla_order:function(e){
     		var self = this;
     		if (self.$el.next().length > 0){
     			self.$el.next().find("input[name='date']").focus();
+    			self.$el.next()[0].scrollIntoView();
     		}
 		},
         line_widget_focus:function(){
@@ -210,7 +213,7 @@ openerp.singla_order = function(instance, local) {
     		var self=this
     		singla_order = new instance.web.Model('singla.order');
     		framework.blockUI();
-    		singla_order.call('write',[[parseInt(self.order.id)],{'notes':self.notes,'price':self.order.price,
+    		singla_order.call('write',[[parseInt(self.order.id)],{'notes':self.order.notes,'price':self.order.price,
     															'date':self.order.date,'partner_id':self.order.partner_id}]).then(function(){
     			_.each(self.line_widget,function(line){
     				line.trigger('save_data',true)
@@ -248,7 +251,6 @@ openerp.singla_order = function(instance, local) {
     		});
     		self.$el.focusin(function(){
     			self.$el.css("border",'2px solid red')
-    			$(this)[0].scrollIntoView();
     		});
     		self.$el.focusout(function(){
     			self.$el.css("border",'1px solid #c8c8d3')
@@ -260,7 +262,33 @@ openerp.singla_order = function(instance, local) {
     	template:"order_document",
     	events:{
     		'keydown':"execute_keydown",
-    		'click .add_an_order':'create_singla_order'
+    		'click .add_an_order':'create_singla_order',
+    		'click button.button_search':'search_display_records',
+    		'click button.show_all':'search_display_records'
+    	},
+    	search_display_records:function(e){
+    		var self = this;
+    		console.log(e);
+    		var partner_id = self.search_partner_m2o.get_value();
+    		var singla_order_filter = []
+    		if ($(e.target).hasClass('button_search')){
+        		singla_order_filter = [['partner_id','=',partner_id]]
+    		}
+    		self.filter_records(singla_order_filter);
+    	},
+    	
+    	filter_records:function(singla_order_filter){
+    		var self = this;
+    		framework.blockUI();
+    		_.each(self.order_widget,function(order){
+    			order.destroy();
+    		})
+    		delete self.orders;
+    		self.order_widget = []
+    		this.initialize_data_def = self.initialize_data(singla_order_filter)
+    		self.render_data_order().done(function(){
+    			framework.unblockUI();
+    		});
     	},
     	execute_keydown:function(e){
     		var self = this;
@@ -285,32 +313,43 @@ openerp.singla_order = function(instance, local) {
     			singla_order_widget.$el[0].scrollIntoView();
     		});
     	},
-    	init:function(parent){
+    	init:function(parent,options,sale_order_filter){
     		var self = this;
     		this._super(parent);
     		this.orders= null;
-    		this.lines = null;
+    		this.parent= parent;
+    		this.options = options
+    		this.singla_order = new instance.web.Model('singla.order')
     		this.order_widget = [];
-    		this.date = Date();
-            this.initialize_data_def = self.initialize_data([],[])
+    		if (sale_order_filter == undefined){
+    			sale_order_filter = [];
+    		}
+            this.initialize_data_def = self.initialize_data(sale_order_filter)
             this.src= session.url('/singla_order/static/src/img/help.png');
+            this.dfm = new instance.web.form.DefaultFieldManager(self);
+    		this.dfm.extend_field_desc({
+            	partner_id: {
+                	string:'Customer',
+                    relation: "res.partner",
+                },
+            });     		
+            this.search_partner_m2o = new instance.web.form.FieldMany2One(self.dfm, {
+            	attrs: {
+                    name: "partner_id",
+                    type: "many2one",
+                    context: {
+                    },
+                    modifiers: '{"required": true}',
+                },
+            });
     	},
-    	fetch_data_order:function(sale_order,filter){
-            def_order = sale_order.query(['date','line_ids','partner_id','notes','price']).filter(filter).all()    		
-            return $.when(def_order)
+    	fetch_data:function(filter){
+    		return this.singla_order.call('get_data',[filter])
     	},
-    	fetch_data_line:function(sale_order_line,filter){
-    		def_lines = sale_order_line.call('get_order_line',[filter])
-    		return $.when(def_lines)
-    	},
-    	initialize_data:function(sale_order_filter,sale_order_line_filter){
+    	initialize_data:function(sale_order_filter){
     		var self = this
-    		var def = $.Deferred();
-            sale_order = new instance.web.Model('singla.order')
-            sale_order_line = new instance.web.Model('singla.order.line')
-    		return $.when(self.fetch_data_order(sale_order,[]),self.fetch_data_line(sale_order_line,[])).done(function(orders,lines){
-            	self.orders = orders;
-            	self.lines = lines;
+    		return $.when(self.fetch_data(sale_order_filter)).done(function(data){
+            	self.orders = data
             });    		
     	},
     	get_order_line:function(order){
@@ -319,31 +358,34 @@ openerp.singla_order = function(instance, local) {
     			return self.lines[id.toString()]
 			});
     	},
+    	render_data_order:function(){
+    		var self = this;
+    		console.log(self.$el.find('div.oe_form_sheet'));
+    		return $.when(self.initialize_data_def).then(function(){
+    			_.each(self.orders,function(order){
+                	new_order = new local.singla_order(order,order.line_ids)
+                	self.order_widget.push(new_order)
+                    new_order.appendTo(list_group)
+            	});            	
+            })    		
+    	},
     	start: function() {
             this._super();
             var self = this;
             var tip; // make it global
-            self.$el.find('img').mouseover(function(e) { // no need to point to 'rel'. Just if 'a' has [title] attribute.
-            	tip = $(this).attr('title'); // tip = this title   
-            	$(this).attr('title','');    // empty title
-                self.$el.find('div.tooltip').fadeTo(300, 1)// fade tooltip and populate .tipBody
-
-            }).mousemove(function(e) {
-                $('.tooltip').css('top', e.pageY + 10 ); // mouse follow!
-                $('.tooltip').css('left', e.pageX + 20 );
+            self.$el.find('img').click(function(e) { // no need to point to 'rel'. Just if 'a' has [title] attribute.
+            	self.$el.find('div.tip').show();
+            })
+            .mousemove(function(e) {
+                $('.tip').css('top', e.pageY + 10 ); // mouse follow!
+                $('.tip').css('left', e.pageX + 20 );
 
             }).mouseout(function(e) {
-                $('.tooltip').hide(); // mouseout: HIDE Tooltip (do not use fadeTo or fadeOut )
-                $(this).attr( 'title', tip ); // reset title attr
+                  $('div.tip').hide(); // mouseout: HIDE Tooltip (do not use fadeTo or fadeOut )
             });
-            
-            $.when(self.initialize_data_def).then(function(){
-            	_.each(self.orders,function(order){
-                	new_order = new local.singla_order(order,self.get_order_line(order))
-                	self.order_widget.push(new_order)
-                    new_order.appendTo(self.$el.find('div.oe_form_sheet'))
-            	});            	
-            })
+            return self.render_data_order().done(function(){
+            	self.search_partner_m2o.prependTo(self.$el.find("div.search_partner"))
+            });
     	},
     	renderElement:function(){
     		var self = this;

@@ -10,7 +10,31 @@ class singla_order(models.Model):
     price = fields.Float("Price")
     notes = fields.Text('Notes')
     line_ids = fields.One2many('singla.order.line','order_id','Order lines')
-    
+
+    @api.model
+    def get_data(self,filter):
+        records = self.search(filter)
+        res = []
+        for i in records:
+            res.append({
+                        'id':i.id,
+                        'date':i.date,
+                        'price':i.price,
+                        'notes':i.notes,
+                        'partner_id':i.partner_id.id,
+                        'line_ids':[{
+                              'id':j.id,
+                              'size':j.size,
+                              'weight':j.weight,
+                              'price':j.price,
+                              'order_id':j.order_id.id
+                              } for j in i.line_ids]
+                        
+                        })
+        print "************************",res
+        return res    
+
+
 class singla_order_line(models.Model):
     _name = "singla.order.line"
     _description = "Order lines"
@@ -19,19 +43,3 @@ class singla_order_line(models.Model):
     price = fields.Char("Price")
     order_id = fields.Many2one('singla.order','Order')
     
-    @api.model
-    def get_order_line(self,filter):
-        records = self.search(filter)
-        res = {}
-        for i in records:
-            res.update({
-                        i.id:{
-                              'id':i.id,
-                              'size':i.size,
-                              'weight':i.weight,
-                              'price':i.price,
-                              'order_id':i.order_id.id
-                              }
-                        })
-        return res
-         
